@@ -125,11 +125,56 @@
       linear-gradient(180deg, transparent 210px, #111 210px, transparent 230px );
       z-index: -1;
     }
+    .modal {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        visibility: hidden;
+        transform: scale(1.1);
+        transition: visibility 0s linear 0.25s, opacity 0.25s 0s, transform 0.25s;
+        z-index: 1; /* Sit on top */
+    }
+
+    .modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 1rem 1.5rem;
+        width: 24rem;
+        border-radius: 0.5rem;
+    }
+
+    .close-button {
+        float: right;
+        width: 1.5rem;
+        line-height: 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        border-radius: 0.25rem;
+        background-color: lightgray;
+    }
+
+    .close-button:hover {
+        background-color: darkgray;
+    }
+
+    .show-modal {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1.0);
+        transition: visibility 0s linear 0s, opacity 0.25s 0s, transform 0.25s;
+    }
 
     </style>
   </head>
   <body>
-    <h1>Sliding Puzzle</h1>
+    <h1>Sorry jako...</h1>
     <div class="bevelBox">
       <div id="puzzle">
         <div class="row">
@@ -148,12 +193,20 @@
         </div>
       </div>
     </div>
-    <p>Made with lots of love by <a href="https://www.abefehr.com/">Abe Fehr</a></p>
+    <div class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h1>Je to účelovka</h1>
+        </div>
+    </div>
+
     <script>
 
 // This is the location of the empty square. At the start it's at 2, 2
 var emptyRow = 2;
 var emptyCol = 2;
+
+var started = false;
 
 // i and j, as passed in, are the tiles' original coordinates
 var makeMoveHandler = function (tile, i, j) {
@@ -173,20 +226,49 @@ var makeMoveHandler = function (tile, i, j) {
       // Swap the two coordinates
       [row, emptyRow] = [emptyRow, row];
       [col, emptyCol] = [emptyCol, col];
+
+      if (started) {
+        checkDone();
+      }
     }
   }
 };
 
 var shuffle = function () {
   var rows = document.querySelectorAll('.row');
-  for (let i = 0; i < 85; ++i) {
-    // Click that tile, and hope it's moveable
-    var row = ~~(Math.random() * rows.length);
+  var order = [[1, 2],[1, 1],[0, 1],[0, 0],[1, 0],[2, 0],[2, 1],[0, 1],[1, 1],[1, 2],[0, 2],[0, 1],[1, 1],[0, 0],[0, 2],[1, 2],[0, 1],[1, 1],[0, 0],[2, 0],[2, 1],[0, 0],[2, 0],[0, 2],[1, 0],[0, 2],[2, 1],[0, 2],[2, 0],[1, 1],[0, 1],[2, 0],[1, 0],[1, 2],[2, 0],[1, 0],[0, 2],[0, 0],[1, 1],[0, 2],[0, 0],[1, 1],[0, 2],[0, 0],[1, 0],[0, 1],[0, 0],[1, 0]]
+
+  for (let i = 0; i < order.length; ++i) {
+    // Click that tile,
+    var row = order[i][0];
     var tiles = rows.item(row).querySelectorAll('.tile');
-    var tile = ~~(Math.random() * tiles.length);
+    var tile = order[i][1];
     tiles.item(tile).click();
   }
 };
+
+var checkDone = function() {
+  var done = true;
+  var rows = document.querySelectorAll('.row');
+  for (let i = 0; i < rows.length; ++i) {
+    var row = rows.item(i);
+    // Go through the tiles on each row
+    var tiles = row.querySelectorAll('.tile');
+    for (let j = 0; j < tiles.length; ++j) {
+      var tile = tiles.item(j);
+
+      if (tile.style.marginLeft == (j * 200 + 'px') &&  tile.style.marginTop == (i * 200 + 'px'))
+        continue;
+      else {
+        done = false;
+      }
+    }
+  }
+
+  if (done) {
+    toggleModal()
+  }
+}
 
 var initTiles = function () {
   // Get all of the rows
@@ -214,19 +296,18 @@ var initTiles = function () {
   }
 };
 
+function toggleModal() {
+  var modal = document.querySelector(".modal");
+  modal.classList.toggle("show-modal");
+}
+
+var closeButton = document.querySelector(".close-button");
+closeButton.addEventListener("click", toggleModal);
+
 // Initialize the tiles
 initTiles();
 shuffle();
-    </script>
-    <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-      ga('create', 'UA-30977471-1', 'auto');
-      ga('send', 'pageview');
-
+started = true;
     </script>
   </body>
 </html>
